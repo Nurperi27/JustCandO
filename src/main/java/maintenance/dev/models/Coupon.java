@@ -10,8 +10,7 @@ import java.util.Set;
 @Table(name = "coupons")
 public class Coupon {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "coupon_gen")
-    @SequenceGenerator(name = "coupon_gen", sequenceName = "coupon_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String code;
     private Float discount;

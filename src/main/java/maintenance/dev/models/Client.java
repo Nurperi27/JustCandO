@@ -12,18 +12,20 @@ import java.util.Set;
 @Table(name = "clients")
 public class Client {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_gen")
-    @SequenceGenerator(name = "client_gen", sequenceName = "client_seq", allocationSize = 1)
+    //strategy = GenerationType.SEQUENCE - при работе с MySQL, происходит эмуляция последовательностей, а не как в PostgreSQL
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_gen")
+//    @SequenceGenerator(name = "client_gen", sequenceName = "client_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String email;
     @Column(name = "registration_date")
     private LocalDateTime registrationDate;
 
-    @OneToOne(mappedBy = "client", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
 
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 
     @ManyToMany
@@ -70,6 +72,9 @@ public class Client {
 
     public void setProfile(Profile profile) {
         this.profile = profile;
+        if(profile != null) {
+            profile.setClientId(this);
+        }
     }
 
     public List<Order> getOrders() {
@@ -86,6 +91,16 @@ public class Client {
 
     public void setCoupons(Set<Coupon> coupons) {
         this.coupons = coupons;
+    }
+
+    //методы, чтобы обе стороны связи были согласованы
+    public void addCoupon(Coupon coupon) {
+        coupons.add(coupon);
+        coupon.getClients().add(this);
+    }
+    public void addOrders(Order order) {
+        orders.add(order);
+        order.setClientId(this);
     }
 
     @Override
